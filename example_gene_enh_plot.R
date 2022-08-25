@@ -5,7 +5,7 @@ library(data.table)
 library(ggplot2)
 
 exampleGene = "ENSG00000100439"
-data = fread("/work/FAC/FBM/DBC/odelanea/glcoex/dribeiro/single_cell/enh_enh_paper/data/gene_enhancer_combinations.out", header = T, sep = "\t") 
+data = fread("~/EnhEnhPaper/data/gene_enhancer_combinations.out", header = T, sep = "\t") 
 
 example = data[gene == exampleGene]
 example = example[order(NBcell)]
@@ -57,22 +57,28 @@ mergedData$active = as.factor(mergedData$active)
 cellDT = unique(mergedData[,.(cells,order)][!is.na(cells)])
 
 # ggplot(mergedData, aes(xmin = enhID-0.5, xmax = enhID+0.5, ymin = combID, ymax = combID+1, fill = log10(cells)) ) + 
-ggplot(mergedData, aes(x = enhID, y = as.factor(-order), fill = log10(cells), color = active)) + 
-  geom_tile( size = 1, width = 0.8, height = 0.8) +
+ggplot(mergedData, aes(x = enhID, y = as.factor(-order), fill = cells, color = active)) + 
+  geom_tile( size = 1, width = 0.7, height = 0.5) +
+  geom_hline(yintercept = 1.5, color = "grey") +
+  geom_hline(yintercept = 2.5, color = "grey") +
+  geom_hline(yintercept = 3.5, color = "grey") +
+  geom_hline(yintercept = 4.5, color = "grey") +
+  geom_hline(yintercept = 5.5, color = "grey") +
+  geom_hline(yintercept = 6.5, color = "grey") +
   geom_text(data = cellDT, aes(y = as.factor(-order), x = 3.6, label = cells, color = "1"), size = 5 ) +
   theme_minimal() +
   xlim(c(0.5,3.6)) +
   xlab("Enhancers") +
   ylab("Enhancer combinations") +
   scale_color_manual(values = c("grey","black")) +
-  scale_fill_gradient(low = "#fee0d2", high = "#ef3b2c", na.value = "white") +
+  scale_fill_gradient(low = "#fee0d2", high = "#ef3b2c", na.value = "white", trans = "log10") +
   theme(text = element_text(size = 18), plot.title = element_text(hjust = 0.5), panel.grid.major=element_blank(), panel.grid.minor=element_blank(),
-        panel.background = element_rect(colour = "black", fill = "white", size = 1), aspect.ratio = 1, axis.text.y = element_blank()  )
-
+        panel.background = element_rect(colour = "black", fill = "white", size = 1), axis.text.y = element_blank()  )
+#aspect.ratio = 1, 
 
 
 ### Real coordinates
-geneModel = fread("/work/FAC/FBM/DBC/odelanea/glcoex/dribeiro/single_cell/enh_enh_paper/data/genes.bed")
+geneModel = fread("~/EnhEnhPaper/data/genes.bed")
 geneModel$gene = data.table(unlist(lapply(geneModel$V4, function(x) unlist(strsplit(x,"[.]"))[1])))$V1
 geneModel = geneModel[gene == exampleGene]
 enhs$chr = data.table(unlist(lapply(enhs$V1, function(x) unlist(strsplit(x,"[_]"))[1])))$V1
@@ -85,12 +91,12 @@ geneModel$st = geneModel$V2/1000
 geneModel$en = geneModel$V3/1000
 
 ggplot() + 
-  geom_rect( data = enhs, aes(xmin = st-1, xmax = en+1, ymin = 1, ymax = 1.1), fill = "#ef3b2c", color = "black", size = 0.5) +
+  geom_rect( data = enhs, aes(xmin = st-1, xmax = en+1, ymin = 1, ymax = 1.1), fill = "grey", color = "black", size = 0.5) +
   geom_rect( data = geneModel, aes(xmin = st-1, xmax = en+1, ymin = 1, ymax = 1.1), fill = "black", size = 0.5) +
   ylim(c(0.98,1.12)) +
   xlab("Chr14 genomic coordiantes (Kb)") +
   theme_minimal() +
-  theme(text = element_text(size = 22), plot.title = element_text(hjust = 0.5), panel.grid.major=element_blank(), panel.grid.minor=element_blank(),
+  theme(text = element_text(size = 20), plot.title = element_text(hjust = 0.5), panel.grid.major=element_blank(), panel.grid.minor=element_blank(),
         panel.background = element_rect(colour = "black", fill = "white", size = 1), axis.text.y = element_blank())
 
 

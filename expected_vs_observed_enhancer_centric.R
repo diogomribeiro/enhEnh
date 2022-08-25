@@ -1,8 +1,8 @@
 #15-Aug-2022 Diogo Ribeiro @ UNIL
 # Script to measure enhancer-enhancer associations across genes
 
-enhEnhData = fread("/work/FAC/FBM/DBC/odelanea/glcoex/dribeiro/single_cell/enh_enh_paper/data/enh_enh_correlation.tsv", header = T, sep = "\t") 
-signData = fread("/work/FAC/FBM/DBC/odelanea/glcoex/dribeiro/single_cell/enh_enh_paper/data/significant_enh_enh.tsv", header = T, sep = "\t") 
+enhEnhData = fread("~/EnhEnhPaper/data/enh_enh_correlation.tsv", header = T, sep = "\t") 
+signData = fread("~/EnhEnhPaper/data//significant_enh_enh.tsv", header = T, sep = "\t") 
 
 length(unique(enhEnhData$tag))
 
@@ -20,23 +20,21 @@ mergedData[is.na(significant)]$significant = 0
 
 mergedData$ratio = mergedData$significant * 100 / mergedData$possible
 mergedData$n_genes = as.factor(mergedData$possible)
-mergedData[possible >= 10][possible <= 12]$n_genes = "10-12"
-mergedData[possible >= 12][possible <= 15]$n_genes = "12-15"
+mergedData[possible >= 8][possible <= 10]$n_genes = "8-10"
+mergedData[possible >= 10][possible <= 15]$n_genes = "10-15"
 mergedData[possible > 15]$n_genes = ">15"
 
 ggplot(mergedData, aes(x=n_genes, y=ratio)) + 
-  geom_boxplot( fill="#bebada") +
-  labs(x="Number of genes", y = "% significant")+
+  geom_boxplot( fill="#bebada", alpha = 0.7) +
+  labs(x="Number of genes", y = "% genes significant")+
   ylim (c(-5,100))+ 
-  geom_text(aes(label=paste("N=",..count.., sep = "") ), y=-5, stat='count', colour="black", size=4.5)+
-  stat_summary(fun=mean, geom="point", size=2, color="red")+
-  stat_summary(fun=mean, geom="text", size=5, color="black",
-               vjust = 1.5, aes(label= paste( round(..y.., digits = 2))))+
+  geom_text(aes(label=paste("N=",..count.., sep = "") ), y=-5, stat='count', colour="black", size=4)+
+  stat_summary(fun=mean, geom="point", size=2, color="#969696")+
+  stat_summary(fun=mean, geom="text", size=5, color="black",vjust = 1.5, aes(label= paste( round(..y.., digits = 1))))+
   theme_linedraw() + 
-  theme(text = element_text(size=24),
-        legend.text=element_text(size=20), legend.title=element_blank(),
+  theme(text = element_text(size=22),
         panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-        panel.border = element_rect(colour = "black", fill=NA, size=1))  
+        panel.border = element_rect(colour = "black", fill=NA, size=1),  aspect.ratio = 1)  
 
 t = cor.test(mergedData$possible,mergedData$ratio, method = "spearman")
 t

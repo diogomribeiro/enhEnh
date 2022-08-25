@@ -9,10 +9,10 @@ corrCutoff = 0.05
 fdrCutoff = 0.05
 minTotalCells = 100
 
-signGeneEnh = fread("/work/FAC/FBM/DBC/odelanea/glcoex/dribeiro/single_cell/enh_enh_paper/data/gene_enhancer_significant.tsv", header = T, sep = "\t") 
+signGeneEnh = fread("/home/dribeiro/EnhEnhPaper/data/gene_enhancer_significant.tsv", header = T, sep = "\t") 
 signGeneEnh$tag = paste(signGeneEnh$gene,"|chr",signGeneEnh$peak,sep="")
 
-allEnhEnh = fread("/work/FAC/FBM/DBC/odelanea/glcoex/dribeiro/single_cell/enh_enh_paper/data/enh_enh_correlation_all.tsv.gz", header = T, sep = "\t") 
+allEnhEnh = fread("/home/dribeiro/EnhEnhPaper/data/enh_enh_correlation_all.tsv.gz", header = T, sep = "\t") 
 allEnhEnh$totalCells = allEnhEnh$oneOne + allEnhEnh$oneZero + allEnhEnh$zeroOne + allEnhEnh$zerozero
 allEnhEnh = allEnhEnh[totalCells >= minTotalCells]
 allEnhEnh$fdr = p.adjust(allEnhEnh$pval,method = "BH")
@@ -33,11 +33,16 @@ v3 = nrow(nonsignEnhEnh[corr > corrCutoff][fdr < fdrCutoff]) / nrow(nonsignEnhEn
 v4 = 1 - v3
 
 ##### table containing the 4 values
-dt = data.table(prop = c(v2,v1,v4,v3), grp = c("sign", "sign", "nonsign", "nonsign"), enh_enh_grp = c("nonsign", "sign", "nonsign", "sign"))
+dt = data.table(prop = c(v2,v1,v4,v3), grp = c("significant", "significant", "non-significant", "non-significant"), enh_enh_grp = c("non-significant", "significant", "non-significant", "significant"))
+
+m = matrix(c(nrow(signEnhEnh[corr > corrCutoff][fdr < fdrCutoff]), nrow(signEnhEnh), nrow(nonsignEnhEnh[corr > corrCutoff][fdr < fdrCutoff]), nrow(nonsignEnhEnh)),nrow=2)
+t = fisher.test(m)
+t
+t$p.value
 
 ##### Plot
-group=c("1","2","3","4")
-ggplot(dt, aes(x=grp,y=prop*100, fill = group)) + 
+`enh-enh assoc.`=c("1","2","3","4")
+ggplot(dt, aes(x=grp,y=prop*100, fill = `enh-enh assoc.`)) + 
   geom_bar( stat = "identity", width = .8, color = "black")+
   ylab("% enh-enh significant") +
   xlab("Gene-enhancer significance") +
@@ -48,7 +53,8 @@ ggplot(dt, aes(x=grp,y=prop*100, fill = group)) +
             colour = "black", size = 5)+
   theme_linedraw() +
   theme(plot.title = element_text(hjust = 0.5), text = element_text(size=24),
-        legend.text=element_text(size=20), legend.title=element_blank(),
+        legend.text=element_text(size=20),
         panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         axis.line = element_line(colour = "black", size = 1),
         panel.border = element_rect(colour = "black", fill=NA, size=1))  
+

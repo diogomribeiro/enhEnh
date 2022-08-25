@@ -4,14 +4,14 @@
 library(data.table)
 library(ggplot2)
 
-enhPerGene = fread("/work/FAC/FBM/DBC/odelanea/glcoex/dribeiro/single_cell/enh_enh_paper/data/gene_enhancer_frequency.tsv", header = T, sep = "\t") 
+enhPerGene = fread("~/EnhEnhPaper/data/gene_enhancer_frequency.tsv", header = T, sep = "\t") 
 
 enhPerGene$expectedPairs = enhPerGene$sign_enh * (enhPerGene$sign_enh - 1) / 2
 
 summary(enhPerGene$expectedPairs)
 
 ### Enhancer-enhancer pairs
-enhEnhData = fread("/work/FAC/FBM/DBC/odelanea/glcoex/dribeiro/single_cell/enh_enh_paper/data/significant_enh_enh.tsv", header = T, sep = "\t") 
+enhEnhData = fread("~/EnhEnhPaper/data/significant_enh_enh.tsv", header = T, sep = "\t") 
 
 observed = data.table(table(enhEnhData$gene))
 colnames(observed) = c("gene","obs")
@@ -36,24 +36,22 @@ ggplot( mergedData, aes(x = expectedPairs, y = obs ))  +
 
 mergedData$ratio = mergedData$obs / mergedData$expectedPairs * 100
 mergedData$NEnh = as.factor(mergedData$sign_enh)
+mergedData[sign_enh >= 8][sign_enh <= 10]$NEnh = "8-10"
 mergedData[sign_enh >= 10][sign_enh <= 15]$NEnh = "10-15"
-mergedData[sign_enh >= 15][sign_enh <= 20]$NEnh = "15-20"
-mergedData[sign_enh > 20]$NEnh = ">20"
+mergedData[sign_enh > 15]$NEnh = ">15"
 
 #### plot
 ggplot(mergedData[!is.na(ratio)], aes(x=NEnh, y=ratio)) + 
-  geom_boxplot( fill="#69b3a2") +
-  labs(x="Number of enhancers", y = "% significant")+
+  geom_boxplot( fill="#69b3a2", alpha = 0.7) +
+  labs(x="Number of enhancers", y = "% enhancer pairs significant")+
   ylim (c(-5,100))+ 
   geom_text(aes(label=paste("N=",..count.., sep = "") ), y=-5, stat='count', colour="black", size=4.5)+
-  stat_summary(fun=mean, geom="point", size=2, color="red")+
-  stat_summary(fun=mean, geom="text", size=5, color="black",
-               vjust = 1.5, aes(label= paste( round(..y.., digits = 2))))+
+  stat_summary(fun=mean, geom="point", size=2, color="#969696")+
+  stat_summary(fun=mean, geom="text", size=5, color="black", vjust = 1.5, aes(label= paste( round(..y.., digits = 1))))+
   theme_linedraw() + 
-  theme(text = element_text(size=24),
-        legend.text=element_text(size=20), legend.title=element_blank(),
+  theme(text = element_text(size=22),
         panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-        panel.border = element_rect(colour = "black", fill=NA, size=1))  
+        panel.border = element_rect(colour = "black", fill=NA, size=1), aspect.ratio = 1)  
 
 t = cor.test(mergedData$ratio,mergedData$sign_enh,method = "spearman")
 t

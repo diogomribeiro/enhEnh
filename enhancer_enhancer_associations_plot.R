@@ -4,7 +4,8 @@
 library(data.table)
 library(ggplot2)
 
-data = fread("/work/FAC/FBM/DBC/odelanea/glcoex/dribeiro/single_cell/enh_enh_paper/data/enh_enh_correlation.tsv", header = T, sep = "\t") 
+# data = fread("~/EnhEnhPaper/data/enh_enh_correlation.tsv", header = T, sep = "\t") 
+data = fread("~/EnhEnhPaper/data/abc/enh_enh_correlation.tsv", header = T, sep = "\t") 
 corrCutoff = 0.05
 fdrCutoff = 0.05
 minTotalCells = 100
@@ -14,7 +15,7 @@ initialGenes = length(unique(data$gene))
 # Apply filter for minimum number of cells expressing the gene
 data$totalCells = data$oneOne + data$oneZero + data$zeroOne + data$zerozero
 data = data[totalCells >= minTotalCells]
-
+length(unique(data$gene))
 data[corr < 0]
 
 data$fdr = p.adjust(data$pval, method = "BH")
@@ -37,9 +38,19 @@ paste(length(unique(sign$gene)),"genes with significant enh-enh associations")
 geneCells = unique(data[,.(gene,totalCells)])
 summary(geneCells$totalCells)
 
+# nrow(data[fdr < 0.05])/nrow(data)
+# nrow(data[significant == "yes"])/nrow(data)
+# nrow(data[fdr < 0.05][corr > 0.05])/nrow(data)
+# nrow(data[fdr < 0.05][corr > 0.1])/nrow(data)
+# data$bon = p.adjust(data$pval, method = "bonferroni")
+# data$significant = "no"
+# data[abs(corr) > corrCutoff][bon < fdrCutoff]$significant = "yes"
+# sign = data[abs(corr) > corrCutoff][bon < fdrCutoff]
+# nrow(data[bon < 0.05])/nrow(data)
+
 ## Correlation distribution
 ggplot(data, aes(x=corr, fill = significant) ) + 
-  geom_histogram( color = "black", size = 0.1, binwidth = 0.01, position = "stack") +
+  geom_histogram( color = "black", size = 0.1, binwidth = 0.01, position = "stack", alpha = 0.7) +
   scale_fill_brewer(palette = "Set2")+
   geom_vline(xintercept = 0.05, color = "grey", linetype = "dashed")+
   xlab("Enhancer-enhancer correlation") +
@@ -49,6 +60,66 @@ ggplot(data, aes(x=corr, fill = significant) ) +
         legend.text=element_text(size=20),
         panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.border = element_rect(colour = "black", fill=NA, size=1), aspect.ratio = 1)  
+
+dt = data.table(significant = c("1:yes","2:no"), values = c(nrow(data[significant == "yes"]), nrow(data[significant == "no"])))
+
+dataCorr0.1 = data
+dataCorr0.1$significant = "no"
+dataCorr0.1[abs(corr) > 0.1][fdr < fdrCutoff]$significant = "yes"
+dataBH = data
+dataBH$significant = "no"
+dataBH[fdr < fdrCutoff]$significant = "yes"
+dataBon = data
+dataBon$fdr = p.adjust(data$pval, method = "bonferroni")
+dataBon$significant = "no"
+dataBon[fdr < fdrCutoff]$significant = "yes"
+
+dt = data.table(cutoff = c("BH 5% &\n Corr > 0.05","BH 5% &\n Corr > 0.05","BH 5%","BH 5%","Bonf. 0.05","Bonf. 0.05","BH 5% &\n Corr > 0.1", "BH 5% &\n Corr > 0.1"),
+                # significant = c("1:yes","2:no","1:yes","2:no","1:yes","2:no","1:yes","2:no"),
+                significant = c("yes","no","yes","no","yes","no","yes","no"),
+                values = c(nrow(data[significant == "yes"]), nrow(data[significant == "no"]), 
+                           nrow(dataBH[significant == "yes"]), nrow(dataBH[significant == "no"]),
+                           nrow(dataBon[significant == "yes"]), nrow(dataBon[significant == "no"]),
+                           nrow(dataCorr0.1[significant == "yes"]), nrow(dataCorr0.1[significant == "no"]))
+                )
+
+dt$perc = dt$values / nrow(data) * 100
+dt$y = dt$values
+dt[significant == "no"]$y = nrow(data)
+
+ggplot(dt, aes(x= cutoff, y = values, fill = significant ) ) + 
+  # geom_bar( stat = "identity", position = "dodge", color = "black", alpha = 0.9) +
+  geom_bar( stat = "identity", position = "stack", color = "black", alpha = 0.7) +
+  scale_fill_brewer(palette = "Set2")+
+  geom_vline(xintercept = 0.05, color = "grey", linetype = "dashed")+
+  geom_text(aes(y = y, label = paste("N =",values)), size = 5, color = "#08306b", vjust = 1.5, fontface = "bold") + 
+  geom_text(aes(y = y, label = paste0(round(perc,1),"%")), size = 5, color = "#08306b", vjust = 3, fontface = "bold") +
+  # stat_summary(fun=mean, geom="text", size=6, color="black", vjust = 2, aes(label= paste("N =",..y..)) )+
+  xlab("Cutoff") +
+  ylab("Enhancer pairs") +
+  theme_linedraw() + 
+  theme(text = element_text(size=24),
+        legend.text=element_text(size=20),
+        panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.border = element_rect(colour = "black", fill=NA, size=1), aspect.ratio = 1)  
+
+ggplot(dt[cutoff == "BH 5% &\n Corr > 0.05"], aes(x= cutoff, y = values, fill = significant ) ) + 
+  # geom_bar( stat = "identity", position = "dodge", color = "black", alpha = 0.9) +
+  geom_bar( stat = "identity", position = "stack", color = "black", alpha = 0.7) +
+  scale_fill_brewer(palette = "Set2")+
+  geom_vline(xintercept = 0.05, color = "grey", linetype = "dashed")+
+  geom_text(aes(y = y, label = paste0("N=",values)), size = 7, color = "#08306b", vjust = 1.5, fontface = "bold") + 
+  geom_text(aes(y = y, label = paste0(round(perc,1),"%")), size = 7, color = "#08306b", vjust = 3, fontface = "bold") +
+  xlab("") +
+  ylab("Enhancer pairs tested") +
+  theme_linedraw() + 
+  theme(text = element_text(size=30),
+        legend.text=element_text(size=20), 
+        axis.text.x=element_blank(),axis.ticks.x=element_blank(),axis.text.y=element_blank(), axis.ticks.y=element_blank(),
+        panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.border = element_rect(colour = "black", fill=NA, size=1))  
+
+
 
 ## Distance comparison
 data$enh1_start = as.numeric(data.table(unlist(lapply(data$enh1, function(x) unlist(strsplit(x,"[_]"))[2])))$V1)
@@ -85,5 +156,4 @@ nrow(data[distance > 1000000][significant == "no"])/nrow(data[significant == "no
 # g = glm(sign ~ distance, data = data, family = binomial)
 # summary(g)
 
-
-write.table(sign,"/work/FAC/FBM/DBC/odelanea/glcoex/dribeiro/single_cell/enh_enh_paper/data/significant_enh_enh.tsv",quote=F,sep="\t",row.names=F)
+write.table(sign,"~/EnhEnhPaper/data/significant_enh_enh.tsv",quote=F,sep="\t",row.names=F)
