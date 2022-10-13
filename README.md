@@ -6,8 +6,8 @@ This repository contains scripts for data processing, analysis and figure genera
 
 ## Analysis scripts
 - **calculate_enh_enh_correlation.R** : Script to calculate enhancer-enhancer correlation from single cell ATAC-seq and RNA-seq for the same cells
-- ** plot_code** R scripts to plot main and supplementary figures of the manuscript
-- ** support_code ** : scripts to create intermediate files to make plots
+- **plot_code** R scripts to plot main and supplementary figures of the manuscript
+- **support_code** : scripts to create intermediate files to make plots
 
 ## Data availability
 The enhancer-enhancer associations produced are available for download as Supplementary Data. Input data used in this study is available in the public domain. LCL single cell RNA-seq and ATAC-seq (SHARE-seq) processed data is publicly available through GEO (accession: GSE140203).
