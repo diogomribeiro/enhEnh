@@ -4,8 +4,8 @@
 library(data.table)
 library(ggplot2)
 
-# data = fread("~/EnhEnhPaper/data/enh_enh_correlation.tsv", header = T, sep = "\t") 
-data = fread("~/EnhEnhPaper/data/abc/enh_enh_correlation.tsv", header = T, sep = "\t") 
+# data = fread("~/EnhEnhPaper/data/enh_enh_correlation.tsv", header = T, sep = "\t")
+data = fread("~/EnhEnhPaper/data/abc/enh_enh_correlation.tsv", header = T, sep = "\t")
 corrCutoff = 0.05
 fdrCutoff = 0.05
 minTotalCells = 100
@@ -38,6 +38,8 @@ paste(length(unique(sign$gene)),"genes with significant enh-enh associations")
 geneCells = unique(data[,.(gene,totalCells)])
 summary(geneCells$totalCells)
 
+# write.table(data,"/home/dribeiro/EnhEnhPaper/data/enh_enh_supp_table.tsv",row.names=F,quote=F,sep="\t")
+
 # nrow(data[fdr < 0.05])/nrow(data)
 # nrow(data[significant == "yes"])/nrow(data)
 # nrow(data[fdr < 0.05][corr > 0.05])/nrow(data)
@@ -50,16 +52,17 @@ summary(geneCells$totalCells)
 
 ## Correlation distribution
 ggplot(data, aes(x=corr, fill = significant) ) + 
-  geom_histogram( color = "black", size = 0.1, binwidth = 0.01, position = "stack", alpha = 0.7) +
-  scale_fill_brewer(palette = "Set2")+
-  geom_vline(xintercept = 0.05, color = "grey", linetype = "dashed")+
+  geom_histogram( color = "black", binwidth = 0.01, position = "stack", size = 0.5) +
+  scale_fill_manual(values = c("#B3AF8F","#66999B")) +
+  geom_vline(xintercept = 0.05, color = "#525252", linetype = "dashed", size = 1)+
   xlab("Enhancer-enhancer correlation") +
   ylab("Frequency") +
   theme_linedraw() + 
-  theme(text = element_text(size=24),
+#  theme(text = element_text(size=20), # small screen
+  theme(text = element_text(size=45), # big screen
         legend.text=element_text(size=20),
         panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-        panel.border = element_rect(colour = "black", fill=NA, size=1), aspect.ratio = 1)  
+        panel.border = element_rect(colour = "black", fill=NA, size=2), aspect.ratio = 1)  
 
 dt = data.table(significant = c("1:yes","2:no"), values = c(nrow(data[significant == "yes"]), nrow(data[significant == "no"])))
 
@@ -88,36 +91,37 @@ dt$y = dt$values
 dt[significant == "no"]$y = nrow(data)
 
 ggplot(dt, aes(x= cutoff, y = values, fill = significant ) ) + 
-  # geom_bar( stat = "identity", position = "dodge", color = "black", alpha = 0.9) +
-  geom_bar( stat = "identity", position = "stack", color = "black", alpha = 0.7) +
-  scale_fill_brewer(palette = "Set2")+
+  geom_bar( stat = "identity", position = "stack", color = "black", size = 2) +
+  # scale_fill_brewer(palette = "Set2")+
+  scale_fill_manual(values = c("#B3AF8F","#66999B")) +
   geom_vline(xintercept = 0.05, color = "grey", linetype = "dashed")+
-  geom_text(aes(y = y, label = paste("N =",values)), size = 5, color = "#08306b", vjust = 1.5, fontface = "bold") + 
-  geom_text(aes(y = y, label = paste0(round(perc,1),"%")), size = 5, color = "#08306b", vjust = 3, fontface = "bold") +
+  geom_text(aes(y = y, label = paste("N =",values)), size = 10, color = "black", vjust = 1.5, fontface = "bold") + 
+  geom_text(aes(y = y, label = paste0(round(perc,1),"%")), size = 10, color = "black", vjust = 3, fontface = "bold") +
   # stat_summary(fun=mean, geom="text", size=6, color="black", vjust = 2, aes(label= paste("N =",..y..)) )+
   xlab("Cutoff") +
   ylab("Enhancer pairs") +
   theme_linedraw() + 
-  theme(text = element_text(size=24),
+  # theme(text = element_text(size=20),
+  theme(text = element_text(size=42), legend.position = "none",
         legend.text=element_text(size=20),
         panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-        panel.border = element_rect(colour = "black", fill=NA, size=1), aspect.ratio = 1)  
+        panel.border = element_rect(colour = "black", fill=NA, size=2), aspect.ratio = 1)  
 
 ggplot(dt[cutoff == "BH 5% &\n Corr > 0.05"], aes(x= cutoff, y = values, fill = significant ) ) + 
   # geom_bar( stat = "identity", position = "dodge", color = "black", alpha = 0.9) +
-  geom_bar( stat = "identity", position = "stack", color = "black", alpha = 0.7) +
-  scale_fill_brewer(palette = "Set2")+
+  geom_bar( stat = "identity", position = "stack", color = "black", size = 1) +
+  scale_fill_manual(values = c("#B3AF8F","#66999B")) +
   geom_vline(xintercept = 0.05, color = "grey", linetype = "dashed")+
-  geom_text(aes(y = y, label = paste0("N=",values)), size = 7, color = "#08306b", vjust = 1.5, fontface = "bold") + 
-  geom_text(aes(y = y, label = paste0(round(perc,1),"%")), size = 7, color = "#08306b", vjust = 3, fontface = "bold") +
+  geom_text(aes(y = y, label = paste0("N=",values)), size = 8, color = "black", vjust = 2, fontface = "bold") + 
+  geom_text(aes(y = y, label = paste0(round(perc,1),"%")), size = 8, color = "black", vjust = 3.5, fontface = "bold") +
   xlab("") +
-  ylab("Enhancer pairs tested") +
+  ylab("Enhancer pairs") +
   theme_linedraw() + 
-  theme(text = element_text(size=30),
+  theme(text = element_text(size=30), legend.position = "none",
         legend.text=element_text(size=20), 
         axis.text.x=element_blank(),axis.ticks.x=element_blank(),axis.text.y=element_blank(), axis.ticks.y=element_blank(),
         panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-        panel.border = element_rect(colour = "black", fill=NA, size=1))  
+        panel.border = element_rect(colour = "black", fill=NA, size=0))  
 
 
 
@@ -138,11 +142,11 @@ wilcox.test(data[significant == "yes"]$distance,data[significant == "no"]$distan
 
 ggplot(data, aes(x=distance/1000, fill = significant) ) + 
   geom_density(alpha = 0.5)+
-  scale_fill_brewer(palette = "Set2")+
+  scale_fill_manual(values = c("#B3AF8F","#66999B")) +
   # geom_vline(xintercept = 1000, color = "grey", linetype = "dashed")+
   xlab("Absolute distance (kb)") +
   theme_linedraw() + 
-  theme(text = element_text(size=24),
+  theme(text = element_text(size=20),
         legend.text=element_text(size=20),
         panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.border = element_rect(colour = "black", fill=NA, size=1), aspect.ratio = 1)  

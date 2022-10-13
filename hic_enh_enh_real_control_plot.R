@@ -27,29 +27,34 @@ ggplot(data[real == 1], aes(x = corr, y = res) ) +
   geom_bin_2d(bins = 80) +
   geom_smooth(method = "lm") +
   # scale_fill_gradient(high = "#cb181d", low = "#fcbba1") +
-  annotate("text", x = Inf, y = Inf, label = text, hjust = 1.05, vjust = 1.5, size = 6, fontface = "bold"  ) +
-  xlab("enhancer-enhancer correlation") +
+  # annotate("text", x = Inf, y = Inf, label = text, hjust = 1.05, vjust = 1.5, size = 6, fontface = "bold"  ) +
+  annotate("text", x = Inf, y = Inf, label = text, hjust = 1.05, vjust = 1.5, size = 11, fontface = "bold"  ) +
+  xlab("Enhancer-enhancer correlation") +
   ylab("Hi-C contact (log distance-scaled)") +
   theme_linedraw() +
-  theme(text = element_text(size = 24), plot.title = element_text(hjust = 0.5), panel.grid.major=element_blank(), panel.grid.minor=element_blank(),
-        panel.background = element_rect(colour = "black", fill = "white", size = 1), aspect.ratio = 1  )
+  # theme(text = element_text(size = 24), # small screen
+  theme(text = element_text(size = 50), # big screen
+              plot.title = element_text(hjust = 0.5), panel.grid.major=element_blank(), panel.grid.minor=element_blank(),
+        panel.background = element_rect(colour = "black", fill = "white", size = 2), aspect.ratio = 1  )
 
 ###### Control regions
 data$group = "real"
 data[real == 0]$group = "control"
 ggplot(data, aes(x = group, y = normalised_contact, fill = group) ) +
-  geom_boxplot() +
-  stat_summary(fun=mean, geom="text", size=5, color="black",
+  geom_boxplot(size = 1) +
+  stat_summary(fun=mean, geom="text", size=6, color="black",
                vjust = 0, aes(label= paste( round(..y.., digits = 2))))+
   # geom_text(aes(label=..count..), y=0, stat='count', colour="black", size=5)+
-  scale_fill_brewer(palette = "Set2") +
+  scale_fill_manual(values = c("#B3AF8F","#66999B")) +
+  # scale_fill_brewer(palette = "Set2") +
   xlab("enhancer-enhancer regions") +
   ylab("Hi-C contact (log-scaled)") +
   theme_minimal() +
-  theme(text = element_text(size = 18), plot.title = element_text(hjust = 0.5), panel.grid.major=element_blank(), panel.grid.minor=element_blank(),
+  theme(text = element_text(size = 22), plot.title = element_text(hjust = 0.5), panel.grid.major=element_blank(), panel.grid.minor=element_blank(),
         panel.background = element_rect(colour = "black", fill = "white", size = 1), aspect.ratio = 1  )
 t = wilcox.test(data[group == "real"]$normalised_contact, data[group == "control"]$normalised_contact)
 t
+t$p.value
 
 ## Direct comparison
 real = data[real == 1][,.(centralStart,cisStart,corr,match_id,normalised_contact)]

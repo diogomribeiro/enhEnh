@@ -17,6 +17,10 @@ allEnhEnh$totalCells = allEnhEnh$oneOne + allEnhEnh$oneZero + allEnhEnh$zeroOne 
 allEnhEnh = allEnhEnh[totalCells >= minTotalCells]
 allEnhEnh$fdr = p.adjust(allEnhEnh$pval,method = "BH")
 
+# allEnhEnh$significant = "no"
+# allEnhEnh[fdr < 0.05][corr > 0.05]$significant = "yes"
+# write.table(allEnhEnh,"~/EnhEnhPaper/data/enh_enh_all_supp_table.tsv.gz",row.names=F,quote=F,sep="\t")
+
 allEnhEnh$tag1 = paste(allEnhEnh$gene,"|",allEnhEnh$enh1,sep="")
 allEnhEnh$tag2 = paste(allEnhEnh$gene,"|",allEnhEnh$enh2,sep="")
 
@@ -43,18 +47,17 @@ t$p.value
 ##### Plot
 `enh-enh assoc.`=c("1","2","3","4")
 ggplot(dt, aes(x=grp,y=prop*100, fill = `enh-enh assoc.`)) + 
-  geom_bar( stat = "identity", width = .8, color = "black")+
+  geom_bar( stat = "identity", width = .8, color = "black", size = 1)+
   ylab("% enh-enh significant") +
   xlab("Gene-enhancer significance") +
   #guides(fill="none")+
-  scale_fill_manual( values =  c("#ccece6","#66C2A5","#d9d9d9","#969696"), labels = c("significant","non-signicant", "significant","non-signicant"  ) ) +
+  scale_fill_manual( values =  c("#ccece6","#66999B","#d9d9d9","#969696"), labels = c("non-significant","significant", "non-significant","significant"  ) ) +
   #  scale_fill_brewer(palette = "Paired" )+
   geom_text(aes(label =paste(format(prop*100, nsmall=0), "%")), position = position_stack(vjust= 0.5),
-            colour = "black", size = 5)+
+            colour = "black", size = 6)+
   theme_linedraw() +
-  theme(plot.title = element_text(hjust = 0.5), text = element_text(size=24),
+  theme(plot.title = element_text(hjust = 0.5), text = element_text(size=22),
         legend.text=element_text(size=20),
         panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-        axis.line = element_line(colour = "black", size = 1),
         panel.border = element_rect(colour = "black", fill=NA, size=1))  
 

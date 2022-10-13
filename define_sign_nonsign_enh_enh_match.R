@@ -8,6 +8,7 @@ maxDistancePerc = 0.05
 minimumCells = 100
 
 enhEnhData = fread("~/EnhEnhPaper/data/enh_enh_correlation.tsv", header = T, sep = "\t")
+# enhEnhData = fread("~/EnhEnhPaper/data/enh_enh_correlation_all.tsv", header = T, sep = "\t")
 # enhEnhData = fread("~/EnhEnhPaper/data/abc/enh_enh_correlation.tsv", header = T, sep = "\t")
 enhEnhData$totalCells = enhEnhData$oneOne + enhEnhData$oneZero + enhEnhData$zeroOne + enhEnhData$zerozero
 enhEnhData = enhEnhData[totalCells >= minimumCells]

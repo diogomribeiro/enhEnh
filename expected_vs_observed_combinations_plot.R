@@ -35,16 +35,20 @@ mergedData[sign_enh > 15]$NEnh = ">15"
 
 #### boxplot
 ggplot(mergedData[!is.na(ratio)][NEnh != 1], aes(x=NEnh, y=ratio)) + 
-  geom_boxplot( fill="#69b3a2", alpha = 0.7) +
+  geom_boxplot( fill="#69b3a2", size = 1.5, width = 0.7, alpha = 0.7, outlier.shape = 1) +
   labs(x="Number of enhancers", y = "% combinations observed")+
   ylim (c(-5,100))+ 
-  geom_text(aes(label=paste("N=",..count.., sep="")), y=-5, stat='count', colour="black", size=4)+
-  stat_summary(fun=mean, geom="point", size=2, color="#969696")+
-  stat_summary(fun=mean, geom="text", size=5, color="black",vjust = 1.5, aes(label= paste( round(..y.., digits = 1))))+
+  # geom_text(aes(label=paste(..count.., sep="")), y=-7.5, stat='count', colour="black", size=4.5)+
+  # stat_summary(fun=mean, geom="point", size=3, color="#969696", shape = 19)+
+  # stat_summary(fun=mean, geom="text", size=5, color="black",vjust = 1.5, aes(label= paste( round(..y.., digits = 1))), fontface = "bold")+
+  geom_text(aes(label=paste(..count.., sep="")), y=-7.5, stat='count', colour="black", size=10)+
+  stat_summary(fun=mean, geom="point", size=7, color="#969696", shape = 19)+
+  stat_summary(fun=mean, geom="text", size=10, color="black",vjust = 1.5, aes(label= paste( round(..y.., digits = 1))), fontface = "bold")+
   theme_linedraw() + 
-  theme(text = element_text(size=22),
+  # theme(text = element_text(size=20),
+  theme(text = element_text(size=44),
         panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-        panel.border = element_rect(colour = "black", fill=NA, size=1), aspect.ratio = 1)  
+        panel.border = element_rect(colour = "black", fill=NA, size=2), aspect.ratio = 1)  
 
 #### density plot
 meltedData = melt(mergedData[,.(expected,observed)])

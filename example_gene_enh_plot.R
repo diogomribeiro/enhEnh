@@ -71,7 +71,7 @@ ggplot(mergedData, aes(x = enhID, y = as.factor(-order), fill = cells, color = a
   xlab("Enhancers") +
   ylab("Enhancer combinations") +
   scale_color_manual(values = c("grey","black")) +
-  scale_fill_gradient(low = "#fee0d2", high = "#ef3b2c", na.value = "white", trans = "log10") +
+  scale_fill_gradient(low = "#dadaeb", high = "#6a51a3", na.value = "white", trans = "log10") +
   theme(text = element_text(size = 18), plot.title = element_text(hjust = 0.5), panel.grid.major=element_blank(), panel.grid.minor=element_blank(),
         panel.background = element_rect(colour = "black", fill = "white", size = 1), axis.text.y = element_blank()  )
 #aspect.ratio = 1, 
