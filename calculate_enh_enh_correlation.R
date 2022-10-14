@@ -5,14 +5,14 @@
 library(data.table)
 
 # Background of cells with ATAC-seq and RNA-seq
-cellBackground = fread("/work/FAC/FBM/DBC/odelanea/glcoex/dribeiro/single_cell/enh_enh_paper/data/rep3_rna_atac_cells/rep3_rna_atac_cells.txt", header = F, sep = "\t")
+cellBackground = fread("rep3_rna_atac_cells.txt", header = F, sep = "\t")
 
 # Gene-enhancer-cell file
-geneEnhCell= fread("/work/FAC/FBM/DBC/odelanea/glcoex/dribeiro/single_cell/enh_enh_paper/data/gene_enhancer_cell_corr_0.05_FDR_5.out.gz", header = T, sep = "\t") 
+geneEnhCell= fread("gene_enhancer_cell_corr_0.05_FDR_5.out.gz", header = T, sep = "\t") 
 length(unique(geneEnhCell$gene))
 
 # Gene expression
-geneDT = fread("/work/FAC/FBM/DBC/odelanea/glcoex/dribeiro/single_cell/enh_enh_paper/data/gene_cell_full.tsv.gz", header = T, sep = "\t") 
+geneDT = fread("gene_cell_full.tsv.gz", header = T, sep = "\t") 
 # Filter for cells with ATAC-seq data
 geneDT = geneDT[cell %in% cellBackground$V1]
 
@@ -70,9 +70,9 @@ for (geneID in unique(geneEnhCell$gene)){
 }
 
 # Write enh-enh correlation
-write.table(df, "/work/FAC/FBM/DBC/odelanea/glcoex/dribeiro/single_cell/enh_enh_paper/data/enh_enh_correlation.tsv",col.names = T , row.names = F , quote = F, sep = "\t" )
+write.table(df, "enh_enh_correlation.tsv",col.names = T , row.names = F , quote = F, sep = "\t" )
 
 # Write gene-enh-enh-cell file
-write.table(geneEnhEnhCells, "/work/FAC/FBM/DBC/odelanea/glcoex/dribeiro/single_cell/enh_enh_paper/data/gene_enh_enh_cell.tsv",col.names = T , row.names = F , quote = F, sep = "\t" )
+write.table(geneEnhEnhCells, "gene_enh_enh_cell.tsv",col.names = T , row.names = F , quote = F, sep = "\t" )
 
 
