@@ -4,15 +4,20 @@
 
 library(data.table)
 
+args = commandArgs(trailingOnly=TRUE)
+if (length(args)<3) {
+  stop("All arguments need to be provided", call.=FALSE)
+}
+
 # Background of cells with ATAC-seq and RNA-seq
-cellBackground = fread("rep3_rna_atac_cells.txt", header = F, sep = "\t")
+cellBackground = fread(args[1], header = F, sep = "\t") # "rep3_rna_atac_cells.txt"
 
 # Gene-enhancer-cell file
-geneEnhCell= fread("gene_enhancer_cell_corr_0.05_FDR_5.out.gz", header = T, sep = "\t") 
+geneEnhCell= fread(args[2], header = T, sep = "\t") # "gene_enhancer_cell_corr_0.05_FDR_5.out.gz"
 length(unique(geneEnhCell$gene))
 
 # Gene expression
-geneDT = fread("gene_cell_full.tsv.gz", header = T, sep = "\t") 
+geneDT = fread(args[3], header = T, sep = "\t") # "gene_cell_full.tsv.gz"
 # Filter for cells with ATAC-seq data
 geneDT = geneDT[cell %in% cellBackground$V1]
 
