@@ -4,7 +4,7 @@ library(data.table)
 library(ggplot2)
 
 ##########Load/process data
-data = fread("../source_data/hic_contacts_significant.bed.gz", header = T, sep = "\t")
+data = fread("/home/dribeiro/EnhEnhPaper/revision/pbmc/hic/pbmc_hic_contacts_significant.bed.gz", header = T, sep = "\t")
 options("scipen"=100, "digits"=2)
 
 ##### reaplce NA by 0
@@ -25,11 +25,11 @@ text = paste("Spearman R:", round(p$estimate,2), "P-val:", signif(p$p.value, dig
 ggplot(data[real == 1], aes(x = corr, y = res) ) +
   geom_bin_2d(bins = 80) +
   geom_smooth(method = "lm") +
-  annotate("text", x = Inf, y = Inf, label = text, hjust = 1.05, vjust = 1.5, size = 11, fontface = "bold"  ) +
+  annotate("text", x = Inf, y = Inf, label = text, hjust = 1.05, vjust = 1.5, size = 10, fontface = "bold"  ) +
   xlab("Enhancer-enhancer correlation") +
   ylab("Hi-C contact (log distance-scaled)") +
   theme_linedraw() +
-  theme(text = element_text(size = 50), # big screen
+  theme(text = element_text(size = 40), # big screen
               plot.title = element_text(hjust = 0.5), panel.grid.major=element_blank(), panel.grid.minor=element_blank(),
         panel.background = element_rect(colour = "black", fill = "white", size = 2), aspect.ratio = 1  )
 

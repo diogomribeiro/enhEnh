@@ -10,22 +10,19 @@ if (length(args)<3) {
 }
 
 # Background of cells with ATAC-seq and RNA-seq
-cellBackground = fread(args[1], header = F, sep = "\t") # "rep3_rna_atac_cells.txt"
-
+cellBackground = fread(args[1], header = F, sep = "\t") # simple list of cell IDs to use, one cell per line
 # Gene-enhancer-cell file
-geneEnhCell= fread(args[2], header = T, sep = "\t") # "gene_enhancer_cell_corr_0.05_FDR_5.out.gz"
-length(unique(geneEnhCell$gene))
-
+geneEnhCell= fread(args[2], header = T, sep = "\t") # TSV file with header with "gene", "tag" and "cell" columns (tag refers to chr_start_end of enhancers) 
 # Gene expression
-geneDT = fread(args[3], header = T, sep = "\t") # "gene_cell_full.tsv.gz"
+geneDT = fread(args[3], header = T, sep = "\t") # TSV file with header with "gene" and "cell" columns
 # Filter for cells with ATAC-seq data
 geneDT = geneDT[cell %in% cellBackground$V1]
 
-length(unique(geneDT$gene))
-length(unique(geneDT$cell))
+paste("Number of genes in gene-enhancer-cell file:",length(unique(geneEnhCell$gene)))
+paste("Number of genes in gene expression data:", length(unique(geneDT$gene)))
+paste("Number of cells in gene expression data:", length(unique(geneDT$cell)))
 
 ###  Enh-enh correlation analysis
-
 df = data.table()
 geneEnhEnhCells = data.table()
 count=0
