@@ -10,7 +10,7 @@ This repository contains scripts for data processing, analysis and figure genera
 - **support_code** : scripts to create intermediate files to make plots
 
 ## Data availability
-The enhancer-enhancer associations produced are available for download as Supplementary Data. Input data used in this study is available in the public domain. LCL single cell RNA-seq and ATAC-seq (SHARE-seq) processed data is publicly available through GEO (accession: GSE140203).
+The enhancer-enhancer associations produced are available for download as Supplementary Data. Input data used in this study is available in the public domain. LCL single cell RNA-seq and ATAC-seq (SHARE-seq) processed data is publicly available through GEO (accession: GSE140203). Peripheral blood mononuclear cells (PBMCs) multimodal data was obtained from 10x Genomics (https://www.10xgenomics.com/resources/datasets/pbmc-from-a-healthy-donor-granulocytes-removed-through-cell-sorting-10-k-1-standard-1-0-0).
 
 ## License
 [![MIT License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
