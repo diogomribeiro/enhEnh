@@ -4,7 +4,7 @@ library(data.table)
 library(ggplot2)
 
 ##########Load/process data
-data = fread("/home/dribeiro/EnhEnhPaper/revision/pbmc/hic/pbmc_hic_contacts_significant.bed.gz", header = T, sep = "\t")
+data = fread("../source_data/hic_contacts_significant.bed.gz", header = T, sep = "\t")
 options("scipen"=100, "digits"=2)
 
 ##### reaplce NA by 0

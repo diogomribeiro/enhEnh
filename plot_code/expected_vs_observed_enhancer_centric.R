@@ -4,8 +4,8 @@
 library(data.table)
 library(ggplot2)
 
-enhEnhData = fread("../source_data/enh_enh_correlation.tsv.gz", header = T, sep = "\t") 
-signData = fread("../source_data/significant_enh_enh.tsv.gz", header = T, sep = "\t") 
+enhEnhData = fread("~/git/enhEnh/source_data/enh_enh_correlation.tsv.gz", header = T, sep = "\t") 
+signData = fread("~/git/enhEnh/source_data/significant_enh_enh.tsv.gz", header = T, sep = "\t") 
 
 length(unique(enhEnhData$tag))
 

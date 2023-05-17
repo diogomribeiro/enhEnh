@@ -6,13 +6,10 @@ library(ggplot2)
 
 options(scipen = 1)
 
-enhEnhData = fread("../source_data/enh_enh_correlation_remap.tsv.gz", header = T, sep = "\t")
+enhEnhData = fread("~/EnhEnhPaper/data/TF/enh_enh_correlation_remap.tsv", header = T, sep = "\t")
 # enhEnhData = fread("../source_data/enh_enh_correlation_motifmap.tsv.gz", header = T, sep = "\t")
-# enhEnhData = fread("../source_data/enh_enh_correlation_remap_abc.tsv.gz", header = T, sep = "\t")
-# enhEnhData = fread("../source_data/enh_enh_correlation_motifmap_abc.tsv.gz", header = T, sep = "\t")
 
-signData = fread("../source_data/significant_enh_enh.tsv.gz", header = T, sep = "\t")
-# signData = fread("../source_data/significant_enh_enh_abc_abc.tsv.gz", header = T, sep = "\t")
+signData = fread("~/git/enhEnh/source_data/significant_enh_enh.tsv.gz", header = T, sep = "\t")
 
 enhEnhData$triplet = paste(enhEnhData$gene,enhEnhData$enh1,enhEnhData$enh2,sep="|")
 signData$triplet = paste(signData$gene,signData$enh1,signData$enh2,sep="|")
@@ -45,7 +42,6 @@ t$p.value
 
 ## Distance-Matched 
 match = fread("../source_data/sign_nonsign_enh_enh_match.txt.gz")
-# match = fread("../source_data/sign_nonsign_enh_enh_match_abc.txt.gz")
 simpleData = unique(mergedData[,.(tag,N)])
 signMatch = simpleData[tag %in% match$sig]
 signMatch$significant = "yes"
@@ -70,11 +66,11 @@ ggplot(matchDT, aes(x=significant, y=N, fill = significant)) +
 
 ## Bin2D plot TF shared vs correlation
 t = cor.test(mergedData$N, mergedData$corr, method = "spearman")
-text = paste("Spearman R = ",round(t$estimate,2), " P-value ",format.pval(t$p.value), sep = "")
+pval = t$p.value 
+if(t$p.value == 0){ pval = 2.2e-308 }
+text = paste("Spearman R = ",round(t$estimate,2), " P-value <",pval, sep = "")
 ggplot(mergedData, aes(x=corr, y=N)) + 
   geom_bin2d( bins = 50) +
-  # geom_bin2d( bins = 30) +
-  # geom_bin2d( bins = 15) +
   geom_smooth(method = "lm", size = 1.5) +
   labs(x="Enhancer-enhancer correlation", y = "# shared TFs")+
   annotate("text", x = Inf, y = Inf, label = text, hjust = 1.05, vjust = 1.5, size = 10, fontface = "bold"  ) +
@@ -88,11 +84,11 @@ ggplot(mergedData, aes(x=corr, y=N)) +
 
 ## Bin2D plot TF shared JI vs correlation
 t = cor.test(mergedData$jaccard_index, mergedData$corr, method = "spearman")
-text = paste("Spearman R = ",round(t$estimate,2), " P-value ",format.pval(t$p.value), sep = "")
+pval = t$p.value
+if(t$p.value == 0){ pval = 2.2e-308 }
+text = paste("Spearman R = ",round(t$estimate,2), " P-value <",pval, sep = "")
 ggplot(mergedData, aes(x=corr, y=jaccard_index)) + 
   geom_bin2d( bins = 50) +
-  # geom_bin2d( bins = 30) +
-  # geom_bin2d( bins = 15) +
   geom_smooth(method = "lm") +
   labs(x="Enhancer-enhancer correlation", y = "TF sharing jaccard index")+
   annotate("text", x = Inf, y = Inf, label = text, hjust = 1.05, vjust = 1.5, size = 5, fontface = "bold"  ) +

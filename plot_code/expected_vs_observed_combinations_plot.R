@@ -4,7 +4,7 @@
 library(data.table)
 library(ggplot2)
 
-enhPerGene = fread("../source_data/gene_enhancer_frequency.tsv.gz", header = T, sep = "\t") 
+enhPerGene = fread("~/git/enhEnh/source_data/gene_enhancer_frequency.tsv.gz", header = T, sep = "\t") 
 
 summary(enhPerGene[sign_enh > 1]$sign_enh)
 
@@ -12,7 +12,7 @@ enhPerGene$expected = 2 ** (enhPerGene$sign_enh) - 1
 summary(enhPerGene$expected)
 
 ### Enhancer-enhancer pairs
-enhEnhData = fread("../source_data/gene_enhancer_combinations.out.gz", header = T, sep = "\t") 
+enhEnhData = fread("~/git/enhEnh/source_data/gene_enhancer_combinations.out.gz", header = T, sep = "\t") 
 
 observed = data.table(table(enhEnhData$gene))
 colnames(observed) = c("gene","observed")
@@ -31,6 +31,10 @@ mergedData$NEnh = as.factor(mergedData$sign_enh)
 mergedData[sign_enh >= 8][sign_enh <= 10]$NEnh = "8-10"
 mergedData[sign_enh >= 10][sign_enh <= 15]$NEnh = "10-15"
 mergedData[sign_enh > 15]$NEnh = ">15"
+
+t = cor.test(mergedData$sign_enh, mergedData$ratio, method = "spearman")
+t$estimate
+t$p.value
 
 #### boxplot
 ggplot(mergedData[!is.na(ratio)][NEnh != 1], aes(x=NEnh, y=ratio)) + 

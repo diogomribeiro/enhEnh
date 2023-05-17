@@ -6,21 +6,18 @@ library(ggplot2)
 
 minimumCells = 100
 
-# rep3Sign = fread("../source_data//significant_enh_enh.tsv.gz", header = T, sep = "\t")
-rep3Sign = fread("../source_data/enh_enh_correlation.tsv.gz", header = T, sep = "\t")
+rep3Sign = fread("~/git/enhEnh/source_data/enh_enh_correlation.tsv.gz", header = T, sep = "\t")
 rep3Sign$totalCells = rep3Sign$oneOne + rep3Sign$oneZero + rep3Sign$zeroOne + rep3Sign$zerozero
 rep3Sign = rep3Sign[totalCells >= minimumCells]
 
 rep3Sign = rep3Sign[,.(gene,enh1,enh2,corr,pval)]
 
-rep2Data = fread("../source_data/rep2_enh_enh_correlation.tsv.gz") 
+rep2Data = fread("~/git/enhEnh/source_data/rep2_enh_enh_correlation.tsv.gz") 
 
 rep2Data$totalCells = rep2Data$oneOne + rep2Data$oneZero + rep2Data$zeroOne + rep2Data$zerozero
 rep2Data = rep2Data[totalCells >= minimumCells]
 
 rep2Data$fdr = p.adjust(rep2Data$pval, method = "BH")
-# rep2Data$significant = "no"
-# rep2Data[corr > 0.05][fdr < 0.05]$significant = "yes"
 rep2Data = unique(rep2Data[,.(gene,enh1,enh2,corr,pval)])
 
 mergedData = merge(rep3Sign, rep2Data, by = c("gene","enh1","enh2"))
@@ -28,10 +25,10 @@ mergedData = merge(rep3Sign, rep2Data, by = c("gene","enh1","enh2"))
 options(scipen = 5)
 
 t = cor.test(mergedData$corr.x,mergedData$corr.y, method = "spearman")
-text = paste("Spearman R =", round(t$estimate,2),"P-value",format.pval(t$p.value, digits = 3))
+if(t$p.value == 0){ pval = 2.2e-308 }
+text = paste("Spearman R = ",round(t$estimate,2), " P-value <",pval, sep = "")
 ggplot(mergedData, aes(x = corr.x, y = corr.y) ) +
   geom_bin2d(bins = 50) +
-  # geom_point(alpha = 0.5, size = 0.5) +
   scale_fill_gradient(high = "#3f007d", low = "#efedf5") +
   geom_smooth(method = "lm") +
   annotate("text", x = Inf, y = Inf, label = text, hjust = 1.05, vjust = 1.5, size = 5, fontface = "bold"  ) +
