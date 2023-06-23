@@ -4,13 +4,62 @@ library(data.table)
 library(ggplot2)
 library(patchwork)
 
-pdf("~/Figure2.pdf",18,16)
+pdf("~/Figure2_new.pdf",18,16)
 
 ##############
 # Panel A
 ##############
 
-mergedData = fread("~/git/enhEnh/source_data/data_figure_2a.tsv.gz", header = T, sep = "\t") 
+exampleGene = "ENSG00000100439"
+data = fread("~/git/enhEnh/source_data/gene_enhancer_combinations.out.gz", header = T, sep = "\t") 
+
+example = data[gene == exampleGene]
+example = example[order(NBcell)]
+example$combID = seq(1,nrow(example))
+
+exampleDT = data.table()
+for (i in seq(1,nrow(example)) ){
+  row = example[i,]
+  enhs = data.table(unlist(lapply(example[i,]$enhancerList, function(x) unlist(strsplit(x,"[,]")))))  
+  for (j in seq(1,nrow(enhs)) ){
+    enh = enhs[j,]$V1
+    enh = gsub(" ","", enh)
+    d = data.table(gene = row$gene, enh = enh, cells = row$NBcell, combID = row$combID)
+    exampleDT = rbind(exampleDT, d)
+  }
+}
+
+exampleDT
+
+enhs = data.table(unique(exampleDT$enh))
+enhs = enhs[order(V1)]
+enhs$enhID = seq(1,nrow(enhs))
+
+mergedData = merge(exampleDT, enhs, by.x = "enh", by.y = "V1")
+mergedData$active = 1
+mergedData$combID = as.factor(mergedData$combID)
+
+order = data.table(table(mergedData$combID))
+order = order[order(-N)]
+order$order = seq(1,nrow(order))
+
+mergedData = merge(mergedData,order, by.x = "combID", by.y = "V1")
+mergedData = mergedData[order(order)]
+
+## Add missing manually
+mergedData = rbind(mergedData, data.table(combID = "2",enh = "", gene = "", cells = NA, enhID = 2, active = 0, N = 2, order = 2))
+mergedData = rbind(mergedData, data.table(combID = "4",enh = "", gene = "", cells = NA, enhID = 3, active = 0, N = 2, order = 3))
+mergedData = rbind(mergedData, data.table(combID = "5",enh = "", gene = "", cells = NA, enhID = 1, active = 0, N = 2, order = 4))
+mergedData = rbind(mergedData, data.table(combID = "1",enh = "", gene = "", cells = NA, enhID = 2, active = 0, N = 2, order = 5))
+mergedData = rbind(mergedData, data.table(combID = "1",enh = "", gene = "", cells = NA, enhID = 3, active = 0, N = 2, order = 5))
+mergedData = rbind(mergedData, data.table(combID = "6",enh = "", gene = "", cells = NA, enhID = 1, active = 0, N = 2, order = 6))
+mergedData = rbind(mergedData, data.table(combID = "6",enh = "", gene = "", cells = NA, enhID = 2, active = 0, N = 2, order = 6))
+mergedData = rbind(mergedData, data.table(combID = "7",enh = "", gene = "", cells = NA, enhID = 1, active = 0, N = 2, order = 7))
+mergedData = rbind(mergedData, data.table(combID = "7",enh = "", gene = "", cells = NA, enhID = 3, active = 0, N = 2, order = 7))
+
+mergedData$active = as.factor(mergedData$active)
+
+cellDT = unique(mergedData[,.(cells,order)][!is.na(cells)])
 
 g1 = ggplot(mergedData, aes(x = enhID, y = as.factor(-order), fill = cells, color = active)) + 
   geom_tile( size = 1, width = 0.7, height = 0.5) +
@@ -21,7 +70,7 @@ g1 = ggplot(mergedData, aes(x = enhID, y = as.factor(-order), fill = cells, colo
   geom_hline(yintercept = 5.5, color = "grey") +
   geom_hline(yintercept = 6.5, color = "grey") +
   geom_text(data = cellDT, aes(y = as.factor(-order), x = 3.5, label = cells, color = "1"), size = 5.5 ) +
-  annotate(geom = "text", label = "# cells", x = 3.5, y = 7.4, size = 5 ) +
+  annotate(geom = "text", label = "cells", x = 3.5, y = 7.4, size = 5 ) +
   scale_x_discrete(limits=c("chr14:22851-22854","chr14:23016-23026","chr14:23388-23388")) +
   scale_color_manual(values = c("grey","black")) +
   scale_fill_gradient(low = "#dadaeb", high = "#6a51a3", na.value = "white", trans = "log10") +
@@ -71,6 +120,8 @@ t = cor.test(mergedData$sign_enh, mergedData$ratio, method = "spearman")
 t$estimate
 t$p.value
 
+mergedData$NEnh = factor(mergedData$NEnh, levels=c("1", "2", "3", "4", "5", "6", "7","8-10", "10-15", ">15"))
+
 g2 = ggplot(mergedData[!is.na(ratio)][NEnh != 1], aes(x=NEnh, y=ratio)) + 
   geom_boxplot( fill="#69b3a2", size = 1, width = 0.7, alpha = 0.7, outlier.shape = 1) +
   geom_text(aes(label=paste(..count.., sep="")), y=-7.5, stat='count', colour="black", size=6)+
@@ -89,6 +140,8 @@ g2 = ggplot(mergedData[!is.na(ratio)][NEnh != 1], aes(x=NEnh, y=ratio)) +
 ##############
 
 mergedData = fread("~/git/enhEnh/source_data/data_figure_2c.tsv.gz", header = T, sep = "\t") 
+
+mergedData$NEnh = factor(mergedData$NEnh, levels=c("1", "2", "3", "4", "5", "6", "7","8-10", "10-15", ">15"))
 
 g3 = ggplot(mergedData[!is.na(ratio)], aes(x=NEnh, y=ratio)) + 
   geom_boxplot( fill="#69b3a2", size = 1,  width = 0.7, alpha = 0.7, outlier.shape = 1) +
@@ -113,6 +166,8 @@ t$p.value
 
 mergedData = fread("~/git/enhEnh/source_data/data_figure_2d.tsv.gz", header = T, sep = "\t")
 
+mergedData$n_genes = factor(mergedData$n_genes, levels=c("1", "2", "3", "4", "5", "6", "7","8-10", "10-15", ">15"))
+
 g4 = ggplot(mergedData, aes(x=n_genes, y=ratio)) + 
   geom_boxplot( fill="#bebada", size = 1, width = 0.7, alpha = 0.7, outlier.shape = 1) +
   geom_text(aes(label=paste(..count.., sep = "") ), y=-7.5, stat='count', colour="black", size=6)+
@@ -122,7 +177,7 @@ g4 = ggplot(mergedData, aes(x=n_genes, y=ratio)) +
   labs(x="Number of genes", y = "% genes significant")+
   labs(tag = "d") +
   theme_linedraw() + 
-  theme(text = element_text(size=25), 
+  theme(text = element_text(size=24), 
         panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.border = element_rect(colour = "black", fill=NA, size=2),  aspect.ratio = 1)  
 
